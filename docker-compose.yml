@@ -1,0 +1,40 @@
+version:                          "3.3"
+
+services:
+  yetiforce-mysql:
+    image:                 mysql
+    volumes:
+      - yetiforce-mysql-data:/var/lib/mysql
+    restart:               unless-stopped
+    networks:
+      - internal
+    environment:
+      MYSQL_ROOT_PASSWORD: yetiforce
+      MYSQL_DATABASE:      yetiforce
+      MYSQL_USER:          yetiforce
+      MYSQL_PASSWORD:      yetiforce
+
+  yetiforce:
+    image:                 f4bio/yetiforcecrm
+    networks:
+      - proxy
+      - internal
+    labels:
+      - traefik.backend=yetiforce
+      - traefik.docker.network=proxy
+      - traefik.frontend.rule=Host:yeti.delphit.com
+      - traefik.enable=true
+      - traefik.port=80
+    depends_on:
+      - yetiforce-mysql
+    volumes:
+      - yetiforce-data:/var/www/html
+    restart:               unless-stopped
+
+volumes:
+  yetiforce-data:
+    external:
+      name:                yetiforce-data
+  yetiforce-mysql-data:
+    external:
+      name:                yetiforce-mysql-data
